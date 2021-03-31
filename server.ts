@@ -33,12 +33,12 @@ app.get("/", async (req, res) => {
 });
 
 
-app.post("/votes/:breed", async (req, res) => {
-  const breed = req.params.breed;
+app.post("/votes", async (req, res) => {
+  const { chosenBreed } = req.body;
   let dbres;
-  let currentVoteCount: any = await client.query("SELECT vote_count FROM votes WHERE breed = $1;", [breed]);
+  let currentVoteCount: any = await client.query("SELECT vote_count FROM votes WHERE breed = $1;", [chosenBreed]);
   const intVoteCount = currentVoteCount.rows.length === 0 ? 1 : parseInt(currentVoteCount.rows[0].vote_count) 
-  dbres = await client.query("INSERT INTO votes(breed, vote_count) VALUES($1, 1) ON CONFLICT (breed) DO UPDATE SET vote_count = ($2 + 1) RETURNING *;", [breed, intVoteCount])
+  dbres = await client.query("INSERT INTO votes(breed, vote_count) VALUES($1, 1) ON CONFLICT (breed) DO UPDATE SET vote_count = ($2 + 1) RETURNING *;", [chosenBreed, intVoteCount])
   res.json(dbres.rows);
 })
 
