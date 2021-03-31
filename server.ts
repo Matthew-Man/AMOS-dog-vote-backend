@@ -28,7 +28,7 @@ client.connect();
 
 
 app.get("/", async (req, res) => {
-  const dbres = await client.query('SELECT * FROM votes');
+  const dbres = await client.query('SELECT * FROM votes ORDER BY vote_count DESC');
   res.json(dbres.rows);
 });
 
