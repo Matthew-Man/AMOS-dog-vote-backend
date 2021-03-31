@@ -27,9 +27,29 @@ const client = new Client(dbConfig);
 client.connect();
 
 app.get("/", async (req, res) => {
-  const dbres = await client.query('select * from categories');
+  const dbres = await client.query('SELECT * FROM votes');
   res.json(dbres.rows);
 });
+
+app.post("/votes/:breed", async (req, res) => {
+  console.log("post made")
+  const breed = req.params.breed;
+  let dbres;
+  let currentVoteCount: any = await client.query("SELECT vote_count FROM votes WHERE breed = $1;", [breed]);
+  const intVoteCount = currentVoteCount.rows.length === 0 ? 1 : parseInt(currentVoteCount.rows[0].vote_count) 
+  dbres = await client.query("INSERT INTO votes(breed, vote_count) VALUES($1, 1) ON CONFLICT (breed) DO UPDATE SET vote_count = ($2 + 1) RETURNING *;", [breed, intVoteCount])
+  res.json(dbres.rows);
+})
+
+
+// function convertDashSql(breed: string) {
+//   if (breed.includes("-")) {
+//     const arrOfBreed = breed.split("-");
+//     return `${arrOfBreed[0]}||'-'||${arrOfBreed[1]}`
+//   } else {
+//     return breed
+//   }
+// }
 
 
 //Start the server on the given port
